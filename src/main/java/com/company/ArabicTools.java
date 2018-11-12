@@ -297,15 +297,19 @@ public class ArabicTools {
 //        }
         formattedNumber += (!arabicSuffixText.isEmpty()) ?arabicSuffixText : "";
 
+        formattedNumber = formattedNumber.trim();
+        if (formattedNumber.isEmpty()) {
+            throw new RuntimeException(
+                    String.format("The number representation for the number [%d] is an empty string.",
+                            number));
+        }
         return formattedNumber;
     }
-
 
     String ProcessArabicGroup(int groupNumber, int groupLevel, int remainingNumber) {
         int tens = groupNumber % 100;
 
         int hundreds = groupNumber / 100;
-
         String retVal = "";
 
         if (hundreds > 0) {
@@ -313,12 +317,10 @@ public class ArabicTools {
                 // حالة المضاف
                 if (groupLevel == 0) {
                     retVal = arabicHundreds.get(hundreds);
-                }
-                else {
+                } else {
                     retVal = arabicAppendedTwos.get(0);
                 }
             } else {
-                //  الحالة العادية
                 retVal = arabicHundreds.get(hundreds);
             }
         }
