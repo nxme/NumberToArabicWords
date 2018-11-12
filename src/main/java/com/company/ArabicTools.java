@@ -172,14 +172,19 @@ public class ArabicTools {
         initialize();
     }
 
-    public String numberToArabicWords(String n) {
-        return convertToArabic(n).trim();
+    /**
+     * Accepts an integer type to convert the number.
+     * @param number The number to convert
+     * @return
+     */
+    public String numberToArabicWords(int number) {
+        return numberToArabicWords(String.valueOf(number));
     }
 
 
-    private String convertToArabic(String number_bi) {
-
+    public String numberToArabicWords(String number_bi) {
         BigInteger number = new BigInteger(number_bi);
+
         if (number.equals(BigInteger.ZERO)) {
             return "صفر";
         }
@@ -191,7 +196,6 @@ public class ArabicTools {
 
         while (tempNumber.compareTo(BigDecimal.ONE) >= 0)
         {
-
             // separate number into groups
             BigDecimal bi_thousand = new BigDecimal("1000");
             BigDecimal numberToProcess = tempNumber.remainder(bi_thousand);
@@ -199,7 +203,6 @@ public class ArabicTools {
             tempNumber = tempNumber.divide(new BigDecimal("1000"));
 
             // convert group into its text
-
             String groupDescription = ProcessArabicGroup(numberToProcess.intValue(), group,
                     tempNumber.setScale(0, BigDecimal.ROUND_FLOOR).intValue());
 
@@ -219,9 +222,18 @@ public class ArabicTools {
                             else
                             {
                                 if (!retVal.isEmpty()) // use appending case
-                                    retVal = arabicAppendedGroup.get(group) + " " + retVal;
-                                else
+                                {
+                                    if (numberToProcess.toBigInteger().compareTo(BigInteger.valueOf(2)) == 0
+                                            || numberToProcess.toBigInteger().compareTo(BigInteger.valueOf(1)) == 0) {
+                                        // retVal = retVal;
+                                    }
+                                    else {
+                                        retVal = arabicAppendedGroup.get(group) + " " + retVal;
+                                    }
+                                }
+                                else {
                                     retVal = arabicGroup.get(group) + " " + retVal; // use normal case
+                                }
                             }
                         }
                     }
@@ -327,15 +339,21 @@ public class ArabicTools {
                     if (!retVal.isEmpty())
                         retVal += " و ";
 
-                    if (tens == 1 && groupLevel > 0)
+                    if (tens == 1 && groupLevel > 0) {
                         retVal += arabicGroup.get(groupLevel);
+                    }
+                    // Since this WAS causing a bug in returning empty string for 1 and 2
+                    // NOTE: No need to handle special case for 1 and 2 numbers like: ليرة سورية و ليرتان سوريتان
+                    // It is reasonable to show "واحد ليرة سورية" and "اثنان ليرة سورية"
                     else if ((tens == 1 || tens == 2)
                             && (groupLevel == 0 || groupLevel == -1)
                             && hundreds == 0
-                            && remainingNumber == 0)
-                        retVal += ""; // Special case for 1 and 2 numbers like: ليرة سورية و ليرتان سوريتان
-                    else
+                            && remainingNumber == 0) {
+                        retVal += GetDigitFeminineStatus(tens, groupLevel, false);; // Special case for 1 and 2 numbers like: ليرة سورية و ليرتان سوريتان
+                    }
+                    else {
                         retVal += GetDigitFeminineStatus(tens, groupLevel, isFeminine);// Get Feminine status for this digit
+                    }
                 }
             } else {
                 int ones = tens % 10;
@@ -349,8 +367,9 @@ public class ArabicTools {
                     retVal += GetDigitFeminineStatus(ones, groupLevel, isFeminine);
                 }
 
-                if (!retVal.isEmpty())
+                if (!retVal.isEmpty()) {
                     retVal += " و ";
+                }
 
                 // Get Tens text
                 retVal += arabicTens.get(tens);
@@ -358,6 +377,10 @@ public class ArabicTools {
         }
 
         return retVal;
+    }
+
+    String GetDigitFeminineStatus(int digit, int groupLevel) {
+        return GetDigitFeminineStatus(digit, groupLevel, isFeminine);
     }
 
     String GetDigitFeminineStatus(int digit, int groupLevel, boolean isFeminine) {
@@ -371,10 +394,8 @@ public class ArabicTools {
                 return arabicFeminineOnes.get(digit);// use feminine field
             else
                 return arabicOnes.get(digit);
-        } else
+        } else {
             return arabicOnes.get(digit);
-
+        }
     }
-
-
 }
